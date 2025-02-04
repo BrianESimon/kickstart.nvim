@@ -166,6 +166,11 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>ft', '<cmd>Neotree<CR>')
+vim.keymap.set('n', '<leader>bn', '<cmd>BufferNext<CR>', { desc = 'Move to [N]ext buffer' })
+vim.keymap.set('n', '<leader>bp', '<cmd>BufferPrevious<CR>', { desc = 'Move to [P]revious buffer' })
+vim.keymap.set('n', '<leader>bc', '<cmd>BufferClose<CR>', { desc = '[C]lose buffer' })
+vim.keymap.set('n', '<leader>bmp', '<cmd>BufferMovePrevious<CR>', { desc = 'Move buffer order to [P]revious' })
+vim.keymap.set('n', '<leader>bmn', '<cmd>BufferMoveNext<CR>', { desc = 'Move buffer order to [N]ext' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
