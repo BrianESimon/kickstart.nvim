@@ -172,6 +172,8 @@ vim.keymap.set('n', '<leader>bc', '<cmd>BufferClose<CR>', { desc = '[C]lose buff
 vim.keymap.set('n', '<leader>bmp', '<cmd>BufferMovePrevious<CR>', { desc = 'Move buffer order to [P]revious' })
 vim.keymap.set('n', '<leader>bmn', '<cmd>BufferMoveNext<CR>', { desc = 'Move buffer order to [N]ext' })
 
+vim.keymap.set('n', '<leader>hv', vim.lsp.buf.hover, { desc = 'LSP Hover' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
