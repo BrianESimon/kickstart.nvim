@@ -278,6 +278,7 @@ require('lazy').setup({
       -- {"3rd/image.nvim", opts = {}}, -- Optional image support in preview window: See `# Preview Mode` for more information
     },
   },
+  { 'm4xshen/autoclose.nvim', opts = {} },
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -899,7 +900,6 @@ require('lazy').setup({
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
-          { name = 'nvim_lsp_signature_help' },
         },
       }
     end,
