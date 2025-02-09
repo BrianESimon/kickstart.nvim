@@ -172,7 +172,7 @@ vim.keymap.set('n', '<leader>bc', '<cmd>BufferClose<CR>', { desc = '[C]lose buff
 vim.keymap.set('n', '<leader>bmp', '<cmd>BufferMovePrevious<CR>', { desc = 'Move buffer order to [P]revious' })
 vim.keymap.set('n', '<leader>bmn', '<cmd>BufferMoveNext<CR>', { desc = 'Move buffer order to [N]ext' })
 
-vim.keymap.set('n', '<leader>hv', vim.lsp.buf.hover, { desc = 'LSP Hover' })
+vim.keymap.set('n', '<leader>lg', '<cmd>LazyGit<CR>', { desc = 'Open LazyGit' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -266,6 +266,13 @@ require('lazy').setup({
     },
   },
   { 'm4xshen/autoclose.nvim', opts = {} },
+  {
+    'kdheepak/lazygit.nvim',
+    -- optional for floating window border decoration
+    requires = {
+      'nvim-lua/plenary.nvim',
+    },
+  },
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
