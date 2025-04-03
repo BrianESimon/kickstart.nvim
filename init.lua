@@ -172,7 +172,10 @@ vim.keymap.set('n', '<leader>bc', '<cmd>BufferClose<CR>', { desc = '[C]lose buff
 vim.keymap.set('n', '<leader>bmp', '<cmd>BufferMovePrevious<CR>', { desc = 'Move buffer order to [P]revious' })
 vim.keymap.set('n', '<leader>bmn', '<cmd>BufferMoveNext<CR>', { desc = 'Move buffer order to [N]ext' })
 
-vim.keymap.set('n', '<leader>lg', '<cmd>LazyGit<CR>', { desc = 'Open LazyGit' })
+vim.keymap.set('n', '<leader>lg', '<cmd>LazyGit<CR>', { desc = 'Open Lazy[G]it' })
+vim.keymap.set('n', '<leader>lr', '<cmd>LspRestart<CR>', { desc = '[R]estart LSP' })
+vim.keymap.set('n', '<leader>tv', '<cmd>vert term<CR>', { desc = '[V]ert term' })
+vim.keymap.set('n', '<leader>tt', '<cmd>hor term<CR>', { desc = 'hor [t]erm' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
