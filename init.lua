@@ -248,7 +248,19 @@ require('lazy').setup({
       'nvim-telescope/telescope.nvim', -- optional
       'neovim/nvim-lspconfig', -- optional
     },
-    opts = {}, -- your configuration
+    opts = {
+      server = {
+        settings = {
+          experimental = {
+            classRegex = {
+              ':\\s*?["\'`]([^"\'`]*).*?,',
+              '(?:enter|enterActive|enterTo|leave|leaveActive|leaveTo)Class="([^"]*)"',
+              '(?:\\b(?:const|let|var)\\s+)?[\\w$_]*(?:[Ss]tyles|[Cc]lasses|[Cc]lassnames)[\\w\\d]*\\s*(?:=|\\+=)\\s*[`\'"]([^\'"]*)[`\'"]',
+            },
+          },
+        },
+      },
+    }, -- your configuration
   },
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   {
@@ -732,6 +744,10 @@ require('lazy').setup({
           },
         },
 
+        emmet_language_server = {
+          filetypes = { 'vue', 'html', 'markdown', 'md' },
+        },
+
         -- Vue 3
         volar = {},
         -- TypeScript
@@ -819,12 +835,21 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
+        vue = { 'eslint', stop_after_first = true },
+        html = { 'eslint', stop_after_first = true },
+        javascript = { 'eslint', stop_after_first = true },
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
     },
+  },
+  {
+    'olrtg/nvim-emmet',
+    config = function()
+      vim.keymap.set({ 'n', 'v' }, '<leader>xe', require('nvim-emmet').wrap_with_abbreviation, { desc = 'Emmet' })
+    end,
   },
 
   { -- Autocompletion
