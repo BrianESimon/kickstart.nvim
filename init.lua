@@ -704,9 +704,12 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
         tailwindcss = {
           filetypes = { 'typescriptreact', 'javascriptreact' },
+        },
+
+        stylelint_lsp = {
+          filetypes = { 'typescript', 'typescriptreact', 'javascriptreact', 'javascript', 'css', 'scss' },
         },
 
         lua_ls = {
@@ -816,8 +819,8 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         vue = { 'eslint', stop_after_first = true },
-        html = { 'eslint', stop_after_first = true },
-        javascript = { 'eslint', stop_after_first = true },
+        html = { 'oxfmt', stop_after_first = true },
+        javascript = { 'oxfmt', stop_after_first = true },
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
@@ -1011,7 +1014,7 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.config', -- Sets main module to use for opts
+    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     branch = 'master',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
