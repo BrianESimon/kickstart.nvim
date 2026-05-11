@@ -239,29 +239,7 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  {
-    'luckasRanarison/tailwind-tools.nvim',
-    name = 'tailwind-tools',
-    build = ':UpdateRemotePlugins',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter',
-      'nvim-telescope/telescope.nvim', -- optional
-      'neovim/nvim-lspconfig', -- optional
-    },
-    opts = {
-      server = {
-        settings = {
-          experimental = {
-            classRegex = {
-              ':\\s*?["\'`]([^"\'`]*).*?,',
-              '(?:enter|enterActive|enterTo|leave|leaveActive|leaveTo)Class="([^"]*)"',
-              '(?:\\b(?:const|let|var)\\s+)?[\\w$_]*(?:[Ss]tyles|[Cc]lasses|[Cc]lassnames)[\\w\\d]*\\s*(?:=|\\+=)\\s*[`\'"]([^\'"]*)[`\'"]',
-            },
-          },
-        },
-      },
-    }, -- your configuration
-  },
+
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   {
     'f-person/git-blame.nvim',
@@ -716,7 +694,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        gopls = {},
+        -- gopls = {},
         yamlls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -727,7 +705,9 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
-        --
+        tailwindcss = {
+          filetypes = { 'typescriptreact', 'javascriptreact' },
+        },
 
         lua_ls = {
           -- cmd = { ... },
@@ -745,23 +725,24 @@ require('lazy').setup({
         },
 
         emmet_language_server = {
-          filetypes = { 'vue', 'html', 'markdown', 'md' },
+          filetypes = { 'html', 'markdown', 'md' },
         },
 
         -- Vue 3
-        volar = {},
+        -- volar = {},
         -- TypeScript
         ts_ls = {
-          filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
-          init_options = {
-            plugins = {
-              {
-                name = '@vue/typescript-plugin',
-                location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
-                languages = { 'vue' },
-              },
-            },
-          },
+          filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
+          -- init_options = {
+          --   plugins = {
+          --     {
+          --       name = '@vue/typescript-plugin',
+          --       location = vim.fn.stdpath 'data' ..
+          --       '/mason/packages/vue-language-server/node_modules/@vue/language-server',
+          --       languages = { 'vue' },
+          --     },
+          --   },
+          -- },
         },
       }
 
@@ -785,17 +766,16 @@ require('lazy').setup({
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+      for name, config in pairs(servers) do
+        local config = config or {}
+        config.capabilities = vim.tbl_deep_extend('force', {}, capabilities, config.capabilities or {})
+        vim.lsp.config(name, config)
+        vim.lsp.enable(name)
+      end
+
       require('mason-lspconfig').setup {
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
+        ensure_installed = {},
+        automatic_installation = false,
       }
     end,
   },
@@ -1031,7 +1011,8 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    main = 'nvim-treesitter.config', -- Sets main module to use for opts
+    branch = 'master',
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
       ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
