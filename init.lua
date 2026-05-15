@@ -371,6 +371,14 @@ do
     },
   }
 
+  -- Per-line git blame virtual text
+  vim.pack.add { gh 'f-person/git-blame.nvim' }
+  require('gitblame').setup {
+    enabled = true,
+    message_template = ' <summary> • <date> • <author> • <<sha>>',
+    date_format = '%m-%d-%Y %H:%M:%S',
+  }
+
   -- Useful plugin to show you pending keybinds.
   vim.pack.add { gh 'folke/which-key.nvim' }
   require('which-key').setup {
@@ -702,6 +710,7 @@ do
   local servers = {
     -- clangd = {},
     -- gopls = {},
+    yamlls = {},
     -- pyright = {},
     -- rust_analyzer = {},
     --
@@ -709,7 +718,29 @@ do
     --    https://github.com/pmizio/typescript-tools.nvim
     --
     -- But for many setups, the LSP (`ts_ls`) will work just fine
-    -- ts_ls = {},
+    tailwindcss = {
+      filetypes = { 'typescriptreact', 'javascriptreact' },
+    },
+
+    eslint = {
+      filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
+    },
+
+    oxlint = {
+      filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
+    },
+
+    stylelint_lsp = {
+      filetypes = { 'typescript', 'typescriptreact', 'javascriptreact', 'javascript', 'css', 'scss' },
+    },
+
+    emmet_language_server = {
+      filetypes = { 'html', 'markdown', 'md' },
+    },
+
+    ts_ls = {
+      filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
+    },
 
     stylua = {}, -- Used to format Lua code
 
@@ -755,6 +786,18 @@ do
     gh 'WhoIsSethDaniel/mason-tool-installer.nvim',
   }
 
+  vim.pack.add {
+    {
+      src = 'https://github.com/nvim-neo-tree/neo-tree.nvim',
+      version = vim.version.range '3',
+    },
+    -- dependencies
+    'https://github.com/nvim-lua/plenary.nvim',
+    'https://github.com/MunifTanjim/nui.nvim',
+    -- optional, but recommended
+    'https://github.com/nvim-tree/nvim-web-devicons',
+  }
+
   -- Automatically install LSPs and related tools to stdpath for Neovim
   require('mason').setup {}
 
@@ -788,28 +831,20 @@ do
   require('conform').setup {
     notify_on_error = false,
     format_on_save = function(bufnr)
-      -- You can specify filetypes to autoformat on save here:
-      local enabled_filetypes = {
-        -- lua = true,
-        -- python = true,
+      local disable_filetypes = { c = true, cpp = true }
+      return {
+        timeout_ms = 500,
+        lsp_format = disable_filetypes[vim.bo[bufnr].filetype] and 'never' or 'fallback',
       }
-      if enabled_filetypes[vim.bo[bufnr].filetype] then
-        return { timeout_ms = 500 }
-      else
-        return nil
-      end
     end,
-    default_format_opts = {
-      lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
-    },
-    -- You can also specify external formatters in here.
     formatters_by_ft = {
-      -- rust = { 'rustfmt' },
-      -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      lua = { 'stylua' },
+      vue = { 'eslint', stop_after_first = true },
+      html = { 'oxfmt', stop_after_first = true },
+      javascript = { 'oxfmt', stop_after_first = true },
+      javascriptreact = { 'oxfmt', stop_after_first = true },
+      typescript = { 'oxfmt', stop_after_first = true },
+      typescriptreact = { 'oxfmt', stop_after_first = true },
     },
   }
 
