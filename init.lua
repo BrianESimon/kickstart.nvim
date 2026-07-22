@@ -743,6 +743,10 @@ do
       filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
     },
 
+    jsonls = {
+      filetypes = { 'json' },
+    },
+
     stylua = {}, -- Used to format Lua code
 
     -- Special Lua Config, as recommended by neovim help docs
