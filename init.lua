@@ -1019,7 +1019,72 @@ do
     gh 'coder/claudecode.nvim',
   }
   require('snacks').setup {}
-  require('claudecode').setup {}
+
+  -- `Esc` in the Claude pane: snacks' terminal sends the first press straight
+  -- through to the CLI (which interrupts Claude) and only *then* starts watching
+  -- for a second press. Debounce it instead -- swallow the first `Esc`, and only
+  -- forward it to Claude if no second press arrives within `esc_timeout` ms. So
+  -- `Esc Esc` gets you to normal mode without touching Claude, and a single
+  -- deliberate `Esc` still interrupts it, just `esc_timeout` later.
+  local esc_timeout = 300
+
+  local function claude_stopinsert(self)
+    if self.esc_timer then
+      self.esc_timer:stop()
+    end
+    vim.cmd 'stopinsert'
+  end
+
+  require('claudecode').setup {
+    terminal = {
+      snacks_win_opts = {
+        keys = {
+          -- Same key name as the snacks default, which replaces it rather than
+          -- adding a second `<Esc>` mapping.
+          term_normal = {
+            '<Esc>',
+            function(self)
+              self.esc_timer = self.esc_timer or (vim.uv or vim.loop).new_timer()
+              if self.esc_timer:is_active() then
+                claude_stopinsert(self)
+              else
+                local buf = self.buf
+                local chan = vim.b[buf].terminal_job_id
+                self.esc_timer:start(
+                  esc_timeout,
+                  0,
+                  vim.schedule_wrap(function()
+                    -- Only pass the `Esc` on if we're still sitting in the
+                    -- terminal, i.e. it really was a lone interrupt.
+                    if chan and vim.api.nvim_get_current_buf() == buf and vim.api.nvim_get_mode().mode == 't' then
+                      pcall(vim.api.nvim_chan_send, chan, '\27')
+                    end
+                  end)
+                )
+              end
+              return ''
+            end,
+            mode = 't',
+            expr = true,
+            desc = 'Double escape to normal mode',
+          },
+          -- Pressed fast enough (under ~50ms apart, which tmux's `escape-time`
+          -- makes likely), both bytes land in one read and Neovim parses them as
+          -- `<M-Esc>` rather than two `<Esc>` presses, so catch that spelling too.
+          term_normal_fast = {
+            '<M-Esc>',
+            function(self)
+              claude_stopinsert(self)
+              return ''
+            end,
+            mode = 't',
+            expr = true,
+            desc = 'Double escape to normal mode (single read)',
+          },
+        },
+      },
+    },
+  }
 
   vim.keymap.set('n', '<leader>ac', '<cmd>ClaudeCode<CR>', { desc = 'Toggle [C]laude' })
   vim.keymap.set('n', '<leader>af', '<cmd>ClaudeCodeFocus<CR>', { desc = '[F]ocus Claude' })
