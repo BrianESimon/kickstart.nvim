@@ -422,6 +422,13 @@ do
   vim.pack.add { gh 'folke/todo-comments.nvim' }
   require('todo-comments').setup { signs = false }
 
+  -- In-buffer markdown rendering (headings, tables, code blocks, checkboxes, ...)
+  --  Toggle with `:Markview`, see `:help markview.nvim`.
+  --  Requires the `markdown`, `markdown_inline`, `html` and `yaml` treesitter
+  --  parsers, which are installed in the treesitter section below.
+  vim.pack.add { gh 'OXY2DEV/markview.nvim' }
+  require('markview').setup {}
+
   -- [[ mini.nvim ]]
   --  A collection of various small independent plugins/modules
   vim.pack.add { gh 'nvim-mini/mini.nvim' }
@@ -950,7 +957,7 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'yaml' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
