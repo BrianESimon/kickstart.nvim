@@ -387,6 +387,7 @@ do
     icons = { mappings = vim.g.have_nerd_font },
     -- Document existing key chains
     spec = {
+      { '<leader>a', group = '[A]I / Claude Code', mode = { 'n', 'v' } },
       { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
       { '<leader>t', group = '[T]oggle' },
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
@@ -752,6 +753,10 @@ do
       filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
     },
 
+    jsonls = {
+      filetypes = { 'json' },
+    },
+
     stylua = {}, -- Used to format Lua code
 
     -- Special Lua Config, as recommended by neovim help docs
@@ -906,6 +911,8 @@ do
       --
       -- See `:help blink-cmp-config-keymap` for defining your own keymap
       preset = 'enter',
+      ['<Tab>'] = { 'select_and_accept', 'snippet_forward', 'fallback' },
+      ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
 
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -1006,7 +1013,110 @@ do
 end
 
 -- ============================================================
--- SECTION 9: OPTIONAL EXAMPLES / NEXT STEPS
+-- SECTION 9: AI / CLAUDE CODE
+-- claudecode.nvim
+-- ============================================================
+do
+  -- Runs the Claude Code CLI in a terminal split and talks to it over a local
+  -- WebSocket, so you can send the current buffer or a visual selection as
+  -- context and review Claude's edits as native Neovim diffs.
+  --
+  -- Requires the `claude` CLI on your $PATH, and `snacks.nvim` for the terminal.
+  --  See https://github.com/coder/claudecode.nvim
+  vim.pack.add {
+    gh 'folke/snacks.nvim',
+    gh 'coder/claudecode.nvim',
+  }
+  require('snacks').setup {}
+
+  -- `Esc` in the Claude pane: snacks' terminal sends the first press straight
+  -- through to the CLI (which interrupts Claude) and only *then* starts watching
+  -- for a second press. Debounce it instead -- swallow the first `Esc`, and only
+  -- forward it to Claude if no second press arrives within `esc_timeout` ms. So
+  -- `Esc Esc` gets you to normal mode without touching Claude, and a single
+  -- deliberate `Esc` still interrupts it, just `esc_timeout` later.
+  local esc_timeout = 300
+
+  local function claude_stopinsert(self)
+    if self.esc_timer then
+      self.esc_timer:stop()
+    end
+    vim.cmd 'stopinsert'
+  end
+
+  require('claudecode').setup {
+    terminal = {
+      snacks_win_opts = {
+        keys = {
+          -- Same key name as the snacks default, which replaces it rather than
+          -- adding a second `<Esc>` mapping.
+          term_normal = {
+            '<Esc>',
+            function(self)
+              self.esc_timer = self.esc_timer or (vim.uv or vim.loop).new_timer()
+              if self.esc_timer:is_active() then
+                claude_stopinsert(self)
+              else
+                local buf = self.buf
+                local chan = vim.b[buf].terminal_job_id
+                self.esc_timer:start(
+                  esc_timeout,
+                  0,
+                  vim.schedule_wrap(function()
+                    -- Only pass the `Esc` on if we're still sitting in the
+                    -- terminal, i.e. it really was a lone interrupt.
+                    if chan and vim.api.nvim_get_current_buf() == buf and vim.api.nvim_get_mode().mode == 't' then
+                      pcall(vim.api.nvim_chan_send, chan, '\27')
+                    end
+                  end)
+                )
+              end
+              return ''
+            end,
+            mode = 't',
+            expr = true,
+            desc = 'Double escape to normal mode',
+          },
+          -- Pressed fast enough (under ~50ms apart, which tmux's `escape-time`
+          -- makes likely), both bytes land in one read and Neovim parses them as
+          -- `<M-Esc>` rather than two `<Esc>` presses, so catch that spelling too.
+          term_normal_fast = {
+            '<M-Esc>',
+            function(self)
+              claude_stopinsert(self)
+              return ''
+            end,
+            mode = 't',
+            expr = true,
+            desc = 'Double escape to normal mode (single read)',
+          },
+        },
+      },
+    },
+  }
+
+  vim.keymap.set('n', '<leader>ac', '<cmd>ClaudeCode<CR>', { desc = 'Toggle [C]laude' })
+  vim.keymap.set('n', '<leader>af', '<cmd>ClaudeCodeFocus<CR>', { desc = '[F]ocus Claude' })
+  vim.keymap.set('n', '<leader>ar', '<cmd>ClaudeCode --resume<CR>', { desc = '[R]esume Claude session' })
+  vim.keymap.set('n', '<leader>aC', '<cmd>ClaudeCode --continue<CR>', { desc = '[C]ontinue last Claude session' })
+  vim.keymap.set('n', '<leader>am', '<cmd>ClaudeCodeSelectModel<CR>', { desc = 'Select Claude [M]odel' })
+  vim.keymap.set('n', '<leader>ab', '<cmd>ClaudeCodeAdd %<CR>', { desc = 'Add current [B]uffer to context' })
+  vim.keymap.set('v', '<leader>as', '<cmd>ClaudeCodeSend<CR>', { desc = '[S]end selection to Claude' })
+  vim.keymap.set('n', '<leader>aa', '<cmd>ClaudeCodeDiffAccept<CR>', { desc = '[A]ccept diff' })
+  vim.keymap.set('n', '<leader>ad', '<cmd>ClaudeCodeDiffDeny<CR>', { desc = '[D]eny diff' })
+
+  -- In a file explorer, `<leader>as` adds the file under the cursor instead.
+  vim.api.nvim_create_autocmd('FileType', {
+    desc = 'Add the file under the cursor to the Claude Code context',
+    pattern = { 'neo-tree', 'NvimTree', 'oil', 'minifiles', 'netrw', 'snacks_picker_list' },
+    callback = function(event)
+      vim.keymap.set('n', '<leader>as', '<cmd>ClaudeCodeTreeAdd<CR>', { buffer = event.buf, desc = 'Add file to Claude context' })
+    end,
+  })
+end
+
+-- ============================================================
+-- SECTION 10: OPTIONAL EXAMPLES / NEXT STEPS
 -- kickstart.plugins.* examples
 -- ============================================================
 do
