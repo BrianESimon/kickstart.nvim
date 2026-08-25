@@ -757,6 +757,12 @@ do
       filetypes = { 'json' },
     },
 
+    -- HashiCorp's official Terraform LSP: completion, diagnostics, docs on hover
+    -- and `terraform fmt` via the LSP formatting handler.
+    terraformls = {
+      filetypes = { 'terraform', 'terraform-vars' },
+    },
+
     stylua = {}, -- Used to format Lua code
 
     -- Special Lua Config, as recommended by neovim help docs
