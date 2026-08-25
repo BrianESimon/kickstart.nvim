@@ -243,6 +243,15 @@ do
   -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
   -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
+  -- [[ Filetype overrides ]]
+
+  -- Neovim decides between Terraform and TinyFugue for `*.tf` by sniffing the
+  -- buffer contents, so a brand-new (still empty) `.tf` file is detected as
+  -- `tf` and no Terraform LSP attaches. Always prefer Terraform.
+  vim.filetype.add {
+    extension = { tf = 'terraform' },
+  }
+
   -- [[ Basic Autocommands ]]
   --  See `:help lua-guide-autocommands`
 
