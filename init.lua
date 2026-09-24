@@ -522,17 +522,24 @@ do
   -- NOTE: You can install multiple plugins at once
   vim.pack.add(telescope_plugins)
 
+  local rg_excludes = { '-g', '!.git', '-g', '!node_modules', '-g', '!.pnpm-store' }
+  local find_command = vim.list_extend({ 'rg', '--files', '--hidden', '--no-ignore' }, rg_excludes)
+  local vimgrep_arguments = vim.list_extend({
+    'rg',
+    '--color=never',
+    '--no-heading',
+    '--with-filename',
+    '--line-number',
+    '--column',
+    '--smart-case',
+    '--hidden',
+    '--no-ignore',
+  }, rg_excludes)
+
   -- See `:help telescope` and `:help telescope.setup()`
   require('telescope').setup {
-    -- You can put your default mappings / updates / etc. in here
-    --  All the info you're looking for is in `:help telescope.setup()`
-    --
-    -- defaults = {
-    --   mappings = {
-    --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-    --   },
-    -- },
-    -- pickers = {}
+    defaults = { vimgrep_arguments = vimgrep_arguments },
+    pickers = { find_files = { find_command = find_command } },
     extensions = {
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
     },
